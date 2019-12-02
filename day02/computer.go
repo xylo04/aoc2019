@@ -10,18 +10,23 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	for _, line := range lines {
-		state, _ := common.AizuArray(line, ",")
-		state[1] = 12
-		state[2] = 2
-		fmt.Printf("Initial state: %d\n", state)
-		compute(&state)
-		fmt.Printf("Final state: %d\n", state)
+	for n := 0; n < 100; n++ {
+		for v := 0; v < 100; v++ {
+			state, _ := common.AizuArray(lines[0], ",")
+			state[1] = n
+			state[2] = v
+			compute(&state)
+			if state[0] == 19690720 {
+				fmt.Printf("%d\n", 100*n+v)
+				return
+			}
+		}
 	}
+	fmt.Println("Nothing resolved to the given value")
 }
 
 func compute(state *[]int) {
-	for i := 0; true ; i += 4 {
+	for i := 0; true; i += 4 {
 		opcode := (*state)[i]
 		if opcode == 99 {
 			return
