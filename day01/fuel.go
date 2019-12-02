@@ -9,7 +9,12 @@ import (
 )
 
 func fuel(mass int) int {
-	return mass/3 - 2
+	f := mass/3 - 2
+	if f > 0 {
+		return f + fuel(f)
+	} else {
+		return 0
+	}
 }
 
 // from https://siongui.github.io/2016/04/06/go-readlines-from-file-or-string/
