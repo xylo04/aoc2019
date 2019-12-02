@@ -1,10 +1,9 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"github.com/xylo04/aoc2019/common"
 	"log"
-	"os"
 	"strconv"
 )
 
@@ -17,24 +16,8 @@ func fuel(mass int) int {
 	}
 }
 
-// from https://siongui.github.io/2016/04/06/go-readlines-from-file-or-string/
-func fileToLines(filePath string) (lines []string, err error) {
-	f, err := os.Open(filePath)
-	if err != nil {
-		return
-	}
-	defer f.Close()
-
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	err = scanner.Err()
-	return
-}
-
 func main() {
-	lines, err := fileToLines("input.txt")
+	lines, err := common.FileToLines("input.txt")
 	if err != nil {
 		panic(err)
 	}
