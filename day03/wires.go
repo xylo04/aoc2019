@@ -15,11 +15,11 @@ type Loc struct {
 	y int
 }
 
-func closestCrossing(input string) interface{} {
+func closestCrossing(input string) int {
 	wireSpecs := strings.Split(input, "\n")
 	log.Printf("Found %d wires, building\n", len(wireSpecs))
-	wireSet0 := buildWire(wireSpecs[0])
-	wireSet1 := buildWire(wireSpecs[1])
+	wireSet0, dist0 := buildWire(wireSpecs[0])
+	wireSet1, dist1 := buildWire(wireSpecs[1])
 
 	log.Printf("Built wires with lengths %d and %d, finding intersections\n", len(wireSet0), len(wireSet1))
 	var intersections = intersect.Hash(wireSet0, wireSet1)
@@ -28,7 +28,7 @@ func closestCrossing(input string) interface{} {
 	minDist := math.MaxInt32
 	for _, intersection := range intersections {
 		i, _ := intersection.(Loc)
-		dist := abs(i.x) + abs(i.y)
+		dist := dist0[i] + dist1[i]
 		if dist < minDist {
 			minDist = dist
 		}
@@ -36,9 +36,10 @@ func closestCrossing(input string) interface{} {
 	return minDist
 }
 
-func buildWire(wireSpec string) []Loc {
-	x, y := 0, 0
+func buildWire(wireSpec string) ([]Loc, map[Loc]int) {
+	x, y, d := 0, 0, 0
 	var wireSet = make([]Loc, 0)
+	dist := map[Loc]int{}
 	segments := strings.Split(wireSpec, ",")
 	for _, seg := range segments {
 		dir := seg[:1]
@@ -54,17 +55,13 @@ func buildWire(wireSpec string) []Loc {
 			case "L":
 				x -= 1
 			}
-			wireSet = append(wireSet, Loc{x, y})
+			loc := Loc{x, y}
+			wireSet = append(wireSet, loc)
+			d++
+			dist[loc] = d
 		}
 	}
-	return wireSet
-}
-
-func abs(a int) int {
-	if a > 0 {
-		return a
-	}
-	return -a
+	return wireSet, dist
 }
 
 func main() {
