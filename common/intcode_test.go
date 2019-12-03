@@ -1,8 +1,6 @@
-package main
+package common
 
 import (
-	"github.com/xylo04/aoc2019/common"
-	"log"
 	"testing"
 )
 
@@ -14,11 +12,10 @@ func TestCompute(t *testing.T) {
 		"1,1,1,4,99,5,6,0,99": "30,1,1,4,2,5,6,0,99",
 	}
 	for inputStr, expectedStr := range testData {
-		log.Println(inputStr, expectedStr)
-		state, _ := common.AizuArray(inputStr, ",")
-		expected, _ := common.AizuArray(expectedStr, ",")
+		state, _ := AizuArray(inputStr, ",")
+		expected, _ := AizuArray(expectedStr, ",")
 
-		compute(&state)
+		ExecuteIntcode(&state)
 		for i := 0; i < len(state); i++ {
 			if state[i] != expected[i] {
 				t.Errorf("For input [%s], final state was expected to be [%s] but was actually %d",
