@@ -3,14 +3,13 @@ package common
 func ExecuteIntcode(state *[]int) {
 	for i := 0; true; {
 		opcode := (*state)[i]
-		if opcode == 99 {
-			return
-		}
-		if opcode == 1 {
+		switch opcode {
+		case 1:
 			i += add(state, i)
-		}
-		if opcode == 2 {
+		case 2:
 			i += mult(state, i)
+		case 99:
+			return
 		}
 	}
 }
