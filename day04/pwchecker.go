@@ -10,17 +10,33 @@ func checkPassword(password string) bool {
 	if len(password) != 6 {
 		return false
 	}
-	repeat := false
+	var repeats []string
 	for i := 1; i < len(password); i++ {
 		lastChar, thisChar := password[i-1], password[i]
 		if lastChar > thisChar {
 			return false
 		}
 		if lastChar == thisChar {
-			repeat = true
+			repeats = append(repeats, string(thisChar))
 		}
 	}
-	return repeat
+	if len(repeats) == 0 {
+		return false
+	}
+	if len(repeats) == 1 {
+		return true
+	}
+
+	repeatCounts := map[string]int{}
+	for i := 0; i < len(repeats); i++ {
+		repeatCounts[repeats[i]]++
+	}
+	for _, v := range repeatCounts {
+		if v == 1 {
+			return true
+		}
+	}
+	return false
 }
 
 func main() {

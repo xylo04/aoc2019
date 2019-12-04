@@ -4,9 +4,13 @@ import "testing"
 
 func TestPasswordChecker(t *testing.T) {
 	testData := map[string]bool{
-		"111111": true,
+		"111111": false,
+		"123456": false,
 		"223450": false,
 		"223459": true,
+		"112233": true,
+		"123444": false,
+		"111122": true,
 	}
 	for password, expected := range testData {
 		actual := checkPassword(password)
