@@ -15,7 +15,7 @@ func TestCompute(t *testing.T) {
 		state, _ := AizuArray(inputStr, ",")
 		expected, _ := AizuArray(expectedStr, ",")
 
-		ExecuteIntcode(&state)
+		ExecuteIntcode(&state, 0)
 		for i := 0; i < len(state); i++ {
 			if state[i] != expected[i] {
 				t.Errorf("For input [%s], final state was expected to be [%s] but was actually %d",
@@ -24,4 +24,9 @@ func TestCompute(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestEcho(t *testing.T) {
+	//program := "3,0,4,0,99"
+
 }

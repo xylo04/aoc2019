@@ -1,35 +1,50 @@
 package common
 
-func ExecuteIntcode(state *[]int) {
+func ExecuteIntcode(mem *[]int, input int) int {
+	out := 0
+programLoop:
 	for i := 0; true; {
-		opcode := (*state)[i]
+		opcode := (*mem)[i]
 		switch opcode {
 		case 1:
-			i += add(state, i)
+			add(mem, &i)
 		case 2:
-			i += mult(state, i)
+			mult(mem, &i)
+		case 3:
+			store(input, mem, &i)
+		case 4:
+			out = output(mem, &i)
 		case 99:
-			return
+			break programLoop
 		}
 	}
+	return out
 }
 
-func add(state *[]int, i int) int {
-	src1 := (*state)[i+1]
-	src2 := (*state)[i+2]
-	dest := (*state)[i+3]
-	val1 := (*state)[src1]
-	val2 := (*state)[src2]
-	(*state)[dest] = val1 + val2
-	return 4
+func add(mem *[]int, i *int) {
+	src1 := (*mem)[*i+1]
+	src2 := (*mem)[*i+2]
+	dest := (*mem)[*i+3]
+	val1 := (*mem)[src1]
+	val2 := (*mem)[src2]
+	(*mem)[dest] = val1 + val2
+	*i += 4
 }
 
-func mult(state *[]int, i int) int {
-	src1 := (*state)[i+1]
-	src2 := (*state)[i+2]
-	dest := (*state)[i+3]
-	val1 := (*state)[src1]
-	val2 := (*state)[src2]
-	(*state)[dest] = val1 * val2
-	return 4
+func mult(mem *[]int, i *int) {
+	src1 := (*mem)[*i+1]
+	src2 := (*mem)[*i+2]
+	dest := (*mem)[*i+3]
+	val1 := (*mem)[src1]
+	val2 := (*mem)[src2]
+	(*mem)[dest] = val1 * val2
+	*i += 4
+}
+
+func store(input int, mem *[]int, i *int) {
+	panic("Not implemented")
+}
+
+func output(mem *[]int, i *int) int {
+	panic("Not implemented")
 }
