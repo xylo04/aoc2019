@@ -27,6 +27,13 @@ func TestCompute(t *testing.T) {
 }
 
 func TestEcho(t *testing.T) {
-	//program := "3,0,4,0,99"
-
+	program := "3,0,4,0,99"
+	for i := -100; i < 100; i++ {
+		mem, _ := AizuArray(program, ",")
+		actual := ExecuteIntcode(&mem, i)
+		if actual != i {
+			t.Errorf("Echo intcode test for %d was actually %d", i, actual)
+			break
+		}
+	}
 }

@@ -41,10 +41,15 @@ func mult(mem *[]int, i *int) {
 	*i += 4
 }
 
-func store(input int, mem *[]int, i *int) {
-	panic("Not implemented")
+func store(val int, mem *[]int, i *int) {
+	dest := (*mem)[*i+1]
+	(*mem)[dest] = val
+	*i += 2
 }
 
 func output(mem *[]int, i *int) int {
-	panic("Not implemented")
+	src := (*mem)[*i+1]
+	val := (*mem)[src]
+	*i += 2
+	return val
 }
