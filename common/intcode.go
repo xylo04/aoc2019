@@ -1,55 +1,66 @@
 package common
 
-func ExecuteIntcode(mem *[]int, input int) int {
-	out := 0
+var mem *[]int
+var ptr int
+
+func ExecuteIntcode(memory *[]int, input int) int {
+	mem = memory
+	io := input
 programLoop:
-	for i := 0; true; {
-		opcode := (*mem)[i]
+	for ptr = 0; true; {
+		opcode := (*mem)[ptr] % 100
 		switch opcode {
 		case 1:
-			add(mem, &i)
+			add()
 		case 2:
-			mult(mem, &i)
+			mult()
 		case 3:
-			store(input, mem, &i)
+			store(io)
 		case 4:
-			out = output(mem, &i)
+			io = output()
 		case 99:
 			break programLoop
 		}
 	}
-	return out
+	return io
 }
 
-func add(mem *[]int, i *int) {
-	src1 := (*mem)[*i+1]
-	src2 := (*mem)[*i+2]
-	dest := (*mem)[*i+3]
-	val1 := (*mem)[src1]
-	val2 := (*mem)[src2]
+// Read an address from the given parameter
+func posParam(num int) int {
+	return (*mem)[ptr+num]
+}
+
+// Read a value referenced by the given parameter's address
+func valueRefParam(num int) int {
+	pos := posParam(num)
+	val := (*mem)[pos]
+	return val
+}
+
+func add() {
+	val1 := valueRefParam(1)
+	val2 := valueRefParam(2)
+	dest := posParam(3)
 	(*mem)[dest] = val1 + val2
-	*i += 4
+	ptr += 4
 }
 
-func mult(mem *[]int, i *int) {
-	src1 := (*mem)[*i+1]
-	src2 := (*mem)[*i+2]
-	dest := (*mem)[*i+3]
-	val1 := (*mem)[src1]
-	val2 := (*mem)[src2]
+func mult() {
+	val1 := valueRefParam(1)
+	val2 := valueRefParam(2)
+	dest := posParam(3)
 	(*mem)[dest] = val1 * val2
-	*i += 4
+	ptr += 4
 }
 
-func store(val int, mem *[]int, i *int) {
-	dest := (*mem)[*i+1]
+func store(val int) {
+	dest := posParam(1)
 	(*mem)[dest] = val
-	*i += 2
+	ptr += 2
 }
 
-func output(mem *[]int, i *int) int {
-	src := (*mem)[*i+1]
-	val := (*mem)[src]
-	*i += 2
+func output() int {
+	val := valueRefParam(1)
+	ptr += 2
 	return val
 }
