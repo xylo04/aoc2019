@@ -1,5 +1,10 @@
 package common
 
+import (
+	"log"
+	"math"
+)
+
 var mem *[]int
 var ptr int
 
@@ -20,6 +25,8 @@ programLoop:
 			io = output()
 		case 99:
 			break programLoop
+		default:
+			log.Panicf("Unexpected opcode %d", opcode)
 		}
 	}
 	return io
@@ -30,24 +37,41 @@ func posParam(num int) int {
 	return (*mem)[ptr+num]
 }
 
-// Read a value referenced by the given parameter's address
-func valueRefParam(num int) int {
-	pos := posParam(num)
+// Read a value, either referenced by the given parameter's address or directly at the parameter's address,
+// depending on the opcode's parameter mode
+func valueParam(num int) int {
+	mode := paramMode(num)
+	var pos int
+	switch mode {
+	case 0:
+		pos = posParam(num)
+	case 1:
+		pos = ptr + num
+	default:
+		log.Panicf("Unexpected mode %d", mode)
+	}
 	val := (*mem)[pos]
 	return val
 }
 
+func paramMode(num int) interface{} {
+	opcode := (*mem)[ptr]
+	mask := int(math.Pow(10, float64(num+1)))
+	mode := (opcode / mask) % 10
+	return mode
+}
+
 func add() {
-	val1 := valueRefParam(1)
-	val2 := valueRefParam(2)
+	val1 := valueParam(1)
+	val2 := valueParam(2)
 	dest := posParam(3)
 	(*mem)[dest] = val1 + val2
 	ptr += 4
 }
 
 func mult() {
-	val1 := valueRefParam(1)
-	val2 := valueRefParam(2)
+	val1 := valueParam(1)
+	val2 := valueParam(2)
 	dest := posParam(3)
 	(*mem)[dest] = val1 * val2
 	ptr += 4
@@ -60,7 +84,7 @@ func store(val int) {
 }
 
 func output() int {
-	val := valueRefParam(1)
+	val := valueParam(1)
 	ptr += 2
 	return val
 }

@@ -12,14 +12,14 @@ func TestCompute(t *testing.T) {
 		"1,1,1,4,99,5,6,0,99": "30,1,1,4,2,5,6,0,99",
 	}
 	for inputStr, expectedStr := range testData {
-		state, _ := AizuArray(inputStr, ",")
+		mem, _ := AizuArray(inputStr, ",")
 		expected, _ := AizuArray(expectedStr, ",")
 
-		ExecuteIntcode(&state, 0)
-		for i := 0; i < len(state); i++ {
-			if state[i] != expected[i] {
-				t.Errorf("For input [%s], final state was expected to be [%s] but was actually %d",
-					inputStr, expectedStr, state)
+		ExecuteIntcode(&mem, 0)
+		for i := 0; i < len(mem); i++ {
+			if mem[i] != expected[i] {
+				t.Errorf("For input %s, final state was expected to be %d but was actually %d",
+					inputStr, expected, mem)
 				break
 			}
 		}
@@ -33,6 +33,18 @@ func TestEcho(t *testing.T) {
 		actual := ExecuteIntcode(&mem, i)
 		if actual != i {
 			t.Errorf("Echo intcode test for %d was actually %d", i, actual)
+			break
+		}
+	}
+}
+
+func TestParamMode(t *testing.T) {
+	mem, _ := AizuArray("1002,4,3,4,33", ",")
+	expected, _ := AizuArray("1002,4,3,4,99", ",")
+	ExecuteIntcode(&mem, 0)
+	for i := 0; i < len(mem); i++ {
+		if mem[i] != expected[i] {
+			t.Errorf("Parameter mode intcode test failed, should be %d but was %d", expected, mem)
 			break
 		}
 	}
