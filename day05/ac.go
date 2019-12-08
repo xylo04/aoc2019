@@ -6,12 +6,12 @@ import (
 )
 
 func main() {
-	const airConditioner = 1
+	const radiator = 5
 	lines, err := common.FileToLines("input.txt")
 	if err != nil {
 		panic(err)
 	}
 	mem, _ := common.AizuArray(lines[0], ",")
-	testResult := common.ExecuteIntcode(&mem, airConditioner)
+	testResult := common.ExecuteIntcode(&mem, radiator)
 	fmt.Printf("%d", testResult)
 }

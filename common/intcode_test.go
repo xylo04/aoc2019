@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestCompute(t *testing.T) {
+func TestAddAndMult(t *testing.T) {
 	testData := map[string]string{
 		"1,0,0,0,99":          "2,0,0,0,99",
 		"2,3,0,3,99":          "2,3,0,6,99",
@@ -48,4 +48,113 @@ func TestParamMode(t *testing.T) {
 			break
 		}
 	}
+}
+
+func TestEqualTo8_PosMode(t *testing.T) {
+	program := "3,9,8,9,10,9,4,9,99,-1,8"
+	for i := -100; i < 100; i++ {
+		mem, _ := AizuArray(program, ",")
+		expected := 0
+		if i == 8 {
+			expected = 1
+		}
+
+		actual := ExecuteIntcode(&mem, i)
+
+		if actual != expected {
+			t.Errorf("%d", actual)
+			break
+		}
+	}
+}
+
+func TestLessThan8_PosMode(t *testing.T) {
+	program := "3,9,7,9,10,9,4,9,99,-1,8"
+	for i := -100; i < 100; i++ {
+		mem, _ := AizuArray(program, ",")
+		expected := 0
+		if i < 8 {
+			expected = 1
+		}
+
+		actual := ExecuteIntcode(&mem, i)
+
+		if actual != expected {
+			t.Errorf("%d", actual)
+			break
+		}
+	}
+}
+func TestEqualTo8_ImmediateMode(t *testing.T) {
+	program := "3,3,1108,-1,8,3,4,3,99"
+	for i := -100; i < 100; i++ {
+		mem, _ := AizuArray(program, ",")
+		expected := 0
+		if i == 8 {
+			expected = 1
+		}
+
+		actual := ExecuteIntcode(&mem, i)
+
+		if actual != expected {
+			t.Errorf("%d", actual)
+			break
+		}
+	}
+}
+
+func TestLessThan8_ImmediateMode(t *testing.T) {
+	program := "3,3,1107,-1,8,3,4,3,99"
+	for i := -100; i < 100; i++ {
+		mem, _ := AizuArray(program, ",")
+		expected := 0
+		if i < 8 {
+			expected = 1
+		}
+
+		actual := ExecuteIntcode(&mem, i)
+
+		if actual != expected {
+			t.Errorf("%d", actual)
+			break
+		}
+	}
+}
+
+func TestJump_Pos(t *testing.T) {
+	program := "3,12,6,12,15,1,13,14,13,4,13,99,-1,0,1,9"
+	for i := -100; i < 100; i++ {
+		mem, _ := AizuArray(program, ",")
+		expected := 1
+		if i == 0 {
+			expected = 0
+		}
+
+		actual := ExecuteIntcode(&mem, i)
+
+		if actual != expected {
+			t.Errorf("%d", actual)
+			break
+		}
+	}
+
+}
+
+func TestJump_Immediate(t *testing.T) {
+	program := "3,3,1105,-1,9,1101,0,0,12,4,12,99,1"
+	for i := -100; i < 100; i++ {
+		mem, _ := AizuArray(program, ",")
+		expected := 1
+		if i == 0 {
+			expected = 0
+		}
+
+		actual := ExecuteIntcode(&mem, i)
+
+		if actual != expected {
+			t.Errorf("%d", actual)
+			break
+		}
+	}
+
 }
