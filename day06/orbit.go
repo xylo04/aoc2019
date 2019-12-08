@@ -2,61 +2,63 @@ package main
 
 import (
 	"fmt"
-	"github.com/deckarep/golang-set"
-	"github.com/goombaio/dag"
+	"github.com/twmb/algoimpl/go/graph"
 	"io/ioutil"
 	"strings"
 )
 
 type OrbitMap struct {
-	graph  *dag.DAG
-	bodies mapset.Set
+	g      *graph.Graph
+	bodies map[string]graph.Node
 }
 
 func createOrbits(orbitStr string) OrbitMap {
-	graph := dag.NewDAG()
-	bodies := mapset.NewSet()
+	g := graph.New(graph.Undirected)
+	bodies := make(map[string]graph.Node, 0)
+	orbitMap := OrbitMap{g, bodies}
+
 	lines := strings.Split(orbitStr, "\n")
 	for _, rel := range lines {
 		if rel == "" {
 			continue
 		}
 		bod := strings.Split(rel, ")")
-		bodies.Add(bod[0])
-		bodies.Add(bod[1])
-		orbited := getOrCreate(bod[0], graph)
-		orbiter := getOrCreate(bod[1], graph)
-		_ = graph.AddVertex(orbited)
-		_ = graph.AddVertex(orbiter)
-		_ = graph.AddEdge(orbited, orbiter)
+		node0 := findOrCreate(bod[0], orbitMap)
+		node1 := findOrCreate(bod[1], orbitMap)
+		_ = g.MakeEdgeWeight(node0, node1, 1)
 	}
-	return OrbitMap{graph, bodies}
+	return orbitMap
 }
 
-func getOrCreate(name string, orbits *dag.DAG) *dag.Vertex {
-	vertex, _ := orbits.GetVertex(name)
-	if vertex == nil {
-		return dag.NewVertex(name, nil)
+func findOrCreate(name string, orbitMap OrbitMap) graph.Node {
+	node, present := orbitMap.bodies[name]
+	if !present {
+		node = orbitMap.g.MakeNode()
+		orbitMap.bodies[name] = node
 	}
-	return vertex
+	return node
 }
 
 func checksumOrbits(orbitMap OrbitMap) int {
 	checksum := 0
-	for body := range orbitMap.bodies.Iterator().C {
-		checksum += stepsToCOM(body.(string), orbitMap)
+
+	for _, node := range orbitMap.bodies {
+		pathsToAll := orbitMap.g.DijkstraSearch(node)
+		checksum += findLengthToCOM(pathsToAll, orbitMap)
 	}
 	return checksum
 }
 
-func stepsToCOM(body string, orbitMap OrbitMap) int {
-	if body == "COM" {
-		return 0
-	} else {
-		vertex, _ := orbitMap.graph.GetVertex(body)
-		var parentVertex = vertex.Parents.Values()[0].(*dag.Vertex)
-		return 1 + stepsToCOM(parentVertex.ID, orbitMap)
+func findLengthToCOM(paths []graph.Path, orbitMap OrbitMap) int {
+	comNode := findOrCreate("COM", orbitMap)
+	for _, path := range paths {
+		edges := len(path.Path)
+		if edges > 0 && path.Path[edges-1].End == comNode {
+			return path.Weight
+		}
 	}
+	// assume this is COM
+	return 0
 }
 
 func main() {
