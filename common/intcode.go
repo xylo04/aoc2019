@@ -8,9 +8,9 @@ import (
 var mem *[]int
 var ptr int
 
-func ExecuteIntcode(memory *[]int, input int) int {
+func ExecuteIntcode(memory *[]int, input []int) int {
 	mem = memory
-	io := input
+	out := 0
 programLoop:
 	for ptr = 0; true; {
 		opcode := (*mem)[ptr] % 100
@@ -20,9 +20,10 @@ programLoop:
 		case 2:
 			mult()
 		case 3:
-			store(io)
+			store(input[0])
+			input = input[1:]
 		case 4:
-			io = output()
+			out = output()
 		case 5:
 			jumpIfTrue()
 		case 6:
@@ -37,7 +38,7 @@ programLoop:
 			log.Panicf("Unexpected opcode %d", opcode)
 		}
 	}
-	return io
+	return out
 }
 
 // Read an address from the given parameter

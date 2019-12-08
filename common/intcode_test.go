@@ -15,7 +15,7 @@ func TestAddAndMult(t *testing.T) {
 		mem, _ := AizuArray(inputStr, ",")
 		expected, _ := AizuArray(expectedStr, ",")
 
-		ExecuteIntcode(&mem, 0)
+		ExecuteIntcode(&mem, []int{0})
 		for i := 0; i < len(mem); i++ {
 			if mem[i] != expected[i] {
 				t.Errorf("For input %s, final state was expected to be %d but was actually %d",
@@ -30,7 +30,7 @@ func TestEcho(t *testing.T) {
 	program := "3,0,4,0,99"
 	for i := -100; i < 100; i++ {
 		mem, _ := AizuArray(program, ",")
-		actual := ExecuteIntcode(&mem, i)
+		actual := ExecuteIntcode(&mem, []int{i})
 		if actual != i {
 			t.Errorf("Echo intcode test for %d was actually %d", i, actual)
 			break
@@ -41,7 +41,7 @@ func TestEcho(t *testing.T) {
 func TestParamMode(t *testing.T) {
 	mem, _ := AizuArray("1002,4,3,4,33", ",")
 	expected, _ := AizuArray("1002,4,3,4,99", ",")
-	ExecuteIntcode(&mem, 0)
+	ExecuteIntcode(&mem, []int{0})
 	for i := 0; i < len(mem); i++ {
 		if mem[i] != expected[i] {
 			t.Errorf("Parameter mode intcode test failed, should be %d but was %d", expected, mem)
@@ -59,7 +59,7 @@ func TestEqualTo8_PosMode(t *testing.T) {
 			expected = 1
 		}
 
-		actual := ExecuteIntcode(&mem, i)
+		actual := ExecuteIntcode(&mem, []int{i})
 
 		if actual != expected {
 			t.Errorf("%d", actual)
@@ -77,7 +77,7 @@ func TestLessThan8_PosMode(t *testing.T) {
 			expected = 1
 		}
 
-		actual := ExecuteIntcode(&mem, i)
+		actual := ExecuteIntcode(&mem, []int{i})
 
 		if actual != expected {
 			t.Errorf("%d", actual)
@@ -94,7 +94,7 @@ func TestEqualTo8_ImmediateMode(t *testing.T) {
 			expected = 1
 		}
 
-		actual := ExecuteIntcode(&mem, i)
+		actual := ExecuteIntcode(&mem, []int{i})
 
 		if actual != expected {
 			t.Errorf("%d", actual)
@@ -112,7 +112,7 @@ func TestLessThan8_ImmediateMode(t *testing.T) {
 			expected = 1
 		}
 
-		actual := ExecuteIntcode(&mem, i)
+		actual := ExecuteIntcode(&mem, []int{i})
 
 		if actual != expected {
 			t.Errorf("%d", actual)
@@ -130,7 +130,7 @@ func TestJump_Pos(t *testing.T) {
 			expected = 0
 		}
 
-		actual := ExecuteIntcode(&mem, i)
+		actual := ExecuteIntcode(&mem, []int{i})
 
 		if actual != expected {
 			t.Errorf("%d", actual)
@@ -149,7 +149,7 @@ func TestJump_Immediate(t *testing.T) {
 			expected = 0
 		}
 
-		actual := ExecuteIntcode(&mem, i)
+		actual := ExecuteIntcode(&mem, []int{i})
 
 		if actual != expected {
 			t.Errorf("%d", actual)

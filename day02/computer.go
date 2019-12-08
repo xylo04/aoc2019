@@ -15,7 +15,7 @@ func main() {
 			state, _ := common.AizuArray(lines[0], ",")
 			state[1] = n
 			state[2] = v
-			common.ExecuteIntcode(&state, 0)
+			common.ExecuteIntcode(&state, []int{0})
 			if state[0] == 19690720 {
 				fmt.Printf("%d\n", 100*n+v)
 				return

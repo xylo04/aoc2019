@@ -12,6 +12,6 @@ func main() {
 		panic(err)
 	}
 	mem, _ := common.AizuArray(lines[0], ",")
-	testResult := common.ExecuteIntcode(&mem, radiator)
+	testResult := common.ExecuteIntcode(&mem, []int{radiator})
 	fmt.Printf("%d", testResult)
 }
