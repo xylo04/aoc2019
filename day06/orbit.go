@@ -41,28 +41,33 @@ func findOrCreate(name string, orbitMap OrbitMap) graph.Node {
 
 func checksumOrbits(orbitMap OrbitMap) int {
 	checksum := 0
-
 	for _, node := range orbitMap.bodies {
 		pathsToAll := orbitMap.g.DijkstraSearch(node)
-		checksum += findLengthToCOM(pathsToAll, orbitMap)
+		checksum += findDistanceToTarget("COM", pathsToAll, orbitMap)
 	}
 	return checksum
 }
 
-func findLengthToCOM(paths []graph.Path, orbitMap OrbitMap) int {
-	comNode := findOrCreate("COM", orbitMap)
+func findDistanceToTarget(name string, paths []graph.Path, orbitMap OrbitMap) int {
+	targetNode := findOrCreate(name, orbitMap)
 	for _, path := range paths {
 		edges := len(path.Path)
-		if edges > 0 && path.Path[edges-1].End == comNode {
+		if edges > 0 && path.Path[edges-1].End == targetNode {
 			return path.Weight
 		}
 	}
-	// assume this is COM
+	// assume this is target
 	return 0
+}
+
+func findDistanceToSanta(orbitMap OrbitMap) interface{} {
+	youNode := findOrCreate("YOU", orbitMap)
+	paths := orbitMap.g.DijkstraSearch(youNode)
+	return findDistanceToTarget("SAN", paths, orbitMap) - 2
 }
 
 func main() {
 	content, _ := ioutil.ReadFile("input.txt")
-	checksum := checksumOrbits(createOrbits(string(content)))
-	fmt.Print(checksum)
+	distance := findDistanceToSanta(createOrbits(string(content)))
+	fmt.Print(distance)
 }
