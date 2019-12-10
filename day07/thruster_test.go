@@ -2,8 +2,8 @@ package main
 
 import "testing"
 
-func testAmpSettings(program string, expectedThrust int, t *testing.T, expectedAmpSettings []int) {
-	actualThrust, actualAmpSettings := findMaxThrust(program)
+func testAmpSettings(program string, expectedThrust int, t *testing.T, expectedAmpSettings []int, rangeMin int, rangeMax int) {
+	actualThrust, actualAmpSettings := findMaxThrust(program, rangeMin, rangeMax)
 
 	if actualThrust != expectedThrust {
 		t.Errorf("Thrust was expected to be %d but was %d", expectedThrust, actualThrust)
@@ -21,7 +21,7 @@ func TestAmplifier1(t *testing.T) {
 	expectedAmpSettings := []int{4, 3, 2, 1, 0}
 	expectedThrust := 43210
 
-	testAmpSettings(program, expectedThrust, t, expectedAmpSettings)
+	testAmpSettings(program, expectedThrust, t, expectedAmpSettings, 0, 4)
 }
 
 func TestAmplifier2(t *testing.T) {
@@ -29,7 +29,7 @@ func TestAmplifier2(t *testing.T) {
 	expectedThrust := 54321
 	expectedAmpSettings := []int{0, 1, 2, 3, 4}
 
-	testAmpSettings(program, expectedThrust, t, expectedAmpSettings)
+	testAmpSettings(program, expectedThrust, t, expectedAmpSettings, 0, 4)
 }
 
 func TestAmplifier3(t *testing.T) {
@@ -37,5 +37,5 @@ func TestAmplifier3(t *testing.T) {
 	expectedThrust := 65210
 	expectedAmpSettings := []int{1, 0, 4, 3, 2}
 
-	testAmpSettings(program, expectedThrust, t, expectedAmpSettings)
+	testAmpSettings(program, expectedThrust, t, expectedAmpSettings, 0, 4)
 }

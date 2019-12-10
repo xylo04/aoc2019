@@ -5,139 +5,144 @@ import (
 	"math"
 )
 
-var mem *[]int
-var ptr int
+type Intcode struct {
+	mem []int
+	ptr int
+	in  <-chan int
+	out chan<- int
+}
 
-func ExecuteIntcode(memory *[]int, input []int) int {
-	mem = memory
-	out := 0
+func NewIntcode(mem []int, in <-chan int, out chan<- int) *Intcode {
+	return &Intcode{mem, 0, in, out}
+}
+
+func (i *Intcode) Execute() {
 programLoop:
-	for ptr = 0; true; {
-		opcode := (*mem)[ptr] % 100
+	for i.ptr = 0; true; {
+		opcode := i.mem[i.ptr] % 100
 		switch opcode {
 		case 1:
-			add()
+			i.add()
 		case 2:
-			mult()
+			i.mult()
 		case 3:
-			store(input[0])
-			input = input[1:]
+			i.store(<-i.in)
 		case 4:
-			out = output()
+			i.out <- i.output()
 		case 5:
-			jumpIfTrue()
+			i.jumpIfTrue()
 		case 6:
-			jumpIfFalse()
+			i.jumpIfFalse()
 		case 7:
-			lessThan()
+			i.lessThan()
 		case 8:
-			equals()
+			i.equals()
 		case 99:
 			break programLoop
 		default:
 			log.Panicf("Unexpected opcode %d", opcode)
 		}
 	}
-	return out
+	close(i.out)
 }
 
 // Read an address from the given parameter
-func posParam(num int) int {
-	return (*mem)[ptr+num]
+func (i *Intcode) posParam(num int) int {
+	return i.mem[i.ptr+num]
 }
 
 // Read a value, either referenced by the given parameter's address or directly at the parameter's address,
 // depending on the opcode's parameter mode.
-func valueParam(num int) int {
-	mode := paramMode(num)
+func (i *Intcode) valueParam(num int) int {
+	mode := i.paramMode(num)
 	var pos int
 	switch mode {
 	case 0:
 		// position mode
-		pos = posParam(num)
+		pos = i.posParam(num)
 	case 1:
 		// immediate mode
-		pos = ptr + num
+		pos = i.ptr + num
 	default:
 		log.Panicf("Unexpected mode %d", mode)
 	}
-	val := (*mem)[pos]
+	val := i.mem[pos]
 	return val
 }
 
-func paramMode(num int) interface{} {
-	opcode := (*mem)[ptr]
+func (i *Intcode) paramMode(num int) interface{} {
+	opcode := i.mem[i.ptr]
 	mask := int(math.Pow(10, float64(num+1)))
 	mode := (opcode / mask) % 10
 	return mode
 }
 
-func add() {
-	val1 := valueParam(1)
-	val2 := valueParam(2)
-	dest := posParam(3)
-	(*mem)[dest] = val1 + val2
-	ptr += 4
+func (i *Intcode) add() {
+	val1 := i.valueParam(1)
+	val2 := i.valueParam(2)
+	dest := i.posParam(3)
+	i.mem[dest] = val1 + val2
+	i.ptr += 4
 }
 
-func mult() {
-	val1 := valueParam(1)
-	val2 := valueParam(2)
-	dest := posParam(3)
-	(*mem)[dest] = val1 * val2
-	ptr += 4
+func (i *Intcode) mult() {
+	val1 := i.valueParam(1)
+	val2 := i.valueParam(2)
+	dest := i.posParam(3)
+	i.mem[dest] = val1 * val2
+	i.ptr += 4
 }
 
-func store(val int) {
-	dest := posParam(1)
-	(*mem)[dest] = val
-	ptr += 2
+func (i *Intcode) store(val int) {
+	dest := i.posParam(1)
+	i.mem[dest] = val
+	i.ptr += 2
 }
 
-func output() int {
-	val := valueParam(1)
-	ptr += 2
+func (i *Intcode) output() int {
+	val := i.valueParam(1)
+	i.ptr += 2
 	return val
 }
 
-func jumpIfTrue() {
-	compare := valueParam(1)
+func (i *Intcode) jumpIfTrue() {
+	compare := i.valueParam(1)
 	if compare != 0 {
-		ptr = valueParam(2)
+		i.ptr = i.valueParam(2)
 	} else {
-		ptr += 3
+		i.ptr += 3
 	}
 }
 
-func jumpIfFalse() {
-	compare := valueParam(1)
+func (i *Intcode) jumpIfFalse() {
+	compare := i.valueParam(1)
 	if compare == 0 {
-		ptr = valueParam(2)
+		i.ptr = i.valueParam(2)
 	} else {
-		ptr += 3
+		i.ptr += 3
 	}
 }
 
-func lessThan() {
-	val1 := valueParam(1)
-	val2 := valueParam(2)
-	dest := posParam(3)
+func (i *Intcode) lessThan() {
+	val1 := i.valueParam(1)
+	val2 := i.valueParam(2)
+	dest := i.posParam(3)
 	if val1 < val2 {
-		(*mem)[dest] = 1
+		i.mem[dest] = 1
 	} else {
-		(*mem)[dest] = 0
+		i.mem[dest] = 0
 	}
-	ptr += 4
+	i.ptr += 4
 }
 
-func equals() {
-	val1 := valueParam(1)
-	val2 := valueParam(2)
-	dest := posParam(3)
+func (i *Intcode) equals() {
+	val1 := i.valueParam(1)
+	val2 := i.valueParam(2)
+	dest := i.posParam(3)
 	if val1 == val2 {
-		(*mem)[dest] = 1
+		i.mem[dest] = 1
 	} else {
-		(*mem)[dest] = 0
+		i.mem[dest] = 0
 	}
-	ptr += 4
+	i.ptr += 4
 }

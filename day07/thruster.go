@@ -10,27 +10,27 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	max, maxSetting := findMaxThrust(lines[0])
+	max, maxSetting := findMaxThrust(lines[0], 0, 4)
 	fmt.Printf("%d at %d", max, maxSetting)
 }
 
-func findMaxThrust(program string) (int, []int) {
+func findMaxThrust(program string, rangeMin int, rangeMax int) (int, []int) {
 	max := 0
 	var maxSetting []int
-	for a := 0; a < 5; a++ {
-		for b := 0; b < 5; b++ {
+	for a := rangeMin; a <= rangeMax; a++ {
+		for b := rangeMin; b <= rangeMax; b++ {
 			if b == a {
 				continue
 			}
-			for c := 0; c < 5; c++ {
+			for c := rangeMin; c <= rangeMax; c++ {
 				if c == a || c == b {
 					continue
 				}
-				for d := 0; d < 5; d++ {
+				for d := rangeMin; d <= rangeMax; d++ {
 					if d == a || d == b || d == c {
 						continue
 					}
-					for e := 0; e < 5; e++ {
+					for e := rangeMin; e <= rangeMax; e++ {
 						if e == a || e == b || e == c || e == d {
 							continue
 						}
@@ -49,10 +49,21 @@ func findMaxThrust(program string) (int, []int) {
 }
 
 func thrusterAmplifiers(program string, ampSettings []int) int {
-	thrust := 0
+	// initialize io channels with amp settings
+	var io = make([]chan int, 6)
+	io[0] = make(chan int, 3)
+	for amp := 0; amp < 5; amp++ {
+		io[amp+1] = make(chan int, 3)
+		io[amp] <- ampSettings[amp]
+	}
+
+	// initialize input thrust to amp A
+	io[0] <- 0
+
+	// start amps
 	for amp := 0; amp < 5; amp++ {
 		mem, _ := common.AizuArray(program, ",")
-		thrust = common.ExecuteIntcode(&mem, []int{ampSettings[amp], thrust})
+		go common.NewIntcode(mem, io[amp], io[amp+1]).Execute()
 	}
-	return thrust
+	return <-io[5]
 }

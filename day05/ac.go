@@ -12,6 +12,10 @@ func main() {
 		panic(err)
 	}
 	mem, _ := common.AizuArray(lines[0], ",")
-	testResult := common.ExecuteIntcode(&mem, []int{radiator})
+	in := make(chan int, 1)
+	out := make(chan int, 1)
+	in <- radiator
+	common.NewIntcode(mem, in, out).Execute()
+	testResult := <-out
 	fmt.Printf("%d", testResult)
 }
