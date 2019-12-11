@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/xylo04/aoc2019/common"
+	"sync"
 )
 
 func main() {
@@ -10,7 +11,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	max, maxSetting := findMaxThrust(lines[0], 0, 4)
+	max, maxSetting := findMaxThrust(lines[0], 5, 9)
 	fmt.Printf("%d at %d", max, maxSetting)
 }
 
@@ -50,10 +51,9 @@ func findMaxThrust(program string, rangeMin int, rangeMax int) (int, []int) {
 
 func thrusterAmplifiers(program string, ampSettings []int) int {
 	// initialize io channels with amp settings
-	var io = make([]chan int, 6)
-	io[0] = make(chan int, 3)
+	var io = make([]chan int, 5)
 	for amp := 0; amp < 5; amp++ {
-		io[amp+1] = make(chan int, 3)
+		io[amp] = make(chan int, 5)
 		io[amp] <- ampSettings[amp]
 	}
 
@@ -61,9 +61,12 @@ func thrusterAmplifiers(program string, ampSettings []int) int {
 	io[0] <- 0
 
 	// start amps
+	wg := &sync.WaitGroup{}
 	for amp := 0; amp < 5; amp++ {
 		mem, _ := common.AizuArray(program, ",")
-		go common.NewIntcode(mem, io[amp], io[amp+1]).Execute()
+		wg.Add(1)
+		go common.NewIntcodeWithWg(mem, io[amp], io[(amp+1)%5], wg).Execute()
 	}
-	return <-io[5]
+	wg.Wait()
+	return <-io[0]
 }

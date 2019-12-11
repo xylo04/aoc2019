@@ -3,6 +3,7 @@ package common
 import (
 	"log"
 	"math"
+	"sync"
 )
 
 type Intcode struct {
@@ -10,13 +11,21 @@ type Intcode struct {
 	ptr int
 	in  <-chan int
 	out chan<- int
+	wg  *sync.WaitGroup
 }
 
 func NewIntcode(mem []int, in <-chan int, out chan<- int) *Intcode {
-	return &Intcode{mem, 0, in, out}
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	return &Intcode{mem, 0, in, out, wg}
+}
+
+func NewIntcodeWithWg(mem []int, in <-chan int, out chan<- int, wg *sync.WaitGroup) *Intcode {
+	return &Intcode{mem, 0, in, out, wg}
 }
 
 func (i *Intcode) Execute() {
+	defer i.wg.Done()
 programLoop:
 	for i.ptr = 0; true; {
 		opcode := i.mem[i.ptr] % 100
