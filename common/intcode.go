@@ -7,21 +7,22 @@ import (
 )
 
 type Intcode struct {
-	mem []int
-	ptr int
-	in  <-chan int
-	out chan<- int
-	wg  *sync.WaitGroup
+	mem     []int
+	ptr     int
+	in      <-chan int
+	out     chan<- int
+	wg      *sync.WaitGroup
+	relBase int
 }
 
 func NewIntcode(mem []int, in <-chan int, out chan<- int) *Intcode {
 	wg := &sync.WaitGroup{}
 	wg.Add(1)
-	return &Intcode{mem, 0, in, out, wg}
+	return &Intcode{mem, 0, in, out, wg, 0}
 }
 
 func NewIntcodeWithWg(mem []int, in <-chan int, out chan<- int, wg *sync.WaitGroup) *Intcode {
-	return &Intcode{mem, 0, in, out, wg}
+	return &Intcode{mem, 0, in, out, wg, 0}
 }
 
 func (i *Intcode) Execute() {
@@ -46,6 +47,8 @@ programLoop:
 			i.lessThan()
 		case 8:
 			i.equals()
+		case 9:
+			i.adjustRelBase()
 		case 99:
 			break programLoop
 		default:
@@ -57,7 +60,18 @@ programLoop:
 
 // Read an address from the given parameter
 func (i *Intcode) posParam(num int) int {
-	return i.mem[i.ptr+num]
+	mode := i.paramMode(num)
+	var pos int
+	switch mode {
+	case 0:
+		// position mode
+		pos = i.mem[i.ptr+num]
+	case 2:
+		pos = i.relBase + i.mem[i.ptr+num]
+	default:
+		log.Panicf("Unexpected mode %d", mode)
+	}
+	return pos
 }
 
 // Read a value, either referenced by the given parameter's address or directly at the parameter's address,
@@ -72,6 +86,8 @@ func (i *Intcode) valueParam(num int) int {
 	case 1:
 		// immediate mode
 		pos = i.ptr + num
+	case 2:
+		pos = i.relBase + i.mem[i.ptr+num]
 	default:
 		log.Panicf("Unexpected mode %d", mode)
 	}
@@ -154,4 +170,10 @@ func (i *Intcode) equals() {
 		i.mem[dest] = 0
 	}
 	i.ptr += 4
+}
+
+func (i *Intcode) adjustRelBase() {
+	val := i.valueParam(1)
+	i.relBase += val
+	i.ptr += 2
 }

@@ -1,6 +1,7 @@
 package common
 
 import (
+	"strconv"
 	"testing"
 )
 
@@ -191,4 +192,44 @@ func TestJump_Immediate(t *testing.T) {
 		}
 	}
 
+}
+
+func TestRelativeMode_echo(t *testing.T) {
+	program := "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99"
+	mem, _ := AizuArray(program, ",")
+	in := make(chan int, 1)
+	out := make(chan int, 1)
+	go NewIntcode(mem, in, out).Execute()
+	expected, _ := AizuArray(program, ",")
+	for i := 0; i < len(expected); i++ {
+		actual := <-out
+		if actual != expected[i] {
+			t.Errorf("Output %d should have been %d but was %d", i, expected[i], actual)
+			break
+		}
+	}
+}
+
+func TestRelativeMode_16digit(t *testing.T) {
+	program := "1102,34915192,34915192,7,4,7,99,0"
+	mem, _ := AizuArray(program, ",")
+	in := make(chan int, 1)
+	out := make(chan int, 1)
+	go NewIntcode(mem, in, out).Execute()
+	actual := <-out
+	if len(strconv.Itoa(actual)) != 16 {
+		t.Errorf("Output %d should have been 16 digits", actual)
+	}
+}
+
+func TestRelativeMode_outputLarge(t *testing.T) {
+	program := "104,1125899906842624,99"
+	mem, _ := AizuArray(program, ",")
+	in := make(chan int, 1)
+	out := make(chan int, 1)
+	go NewIntcode(mem, in, out).Execute()
+	actual := <-out
+	if actual != 1125899906842624 {
+		t.Errorf("Output %d should have been 1125899906842624", actual)
+	}
 }

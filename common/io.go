@@ -25,8 +25,9 @@ func FileToLines(filePath string) (lines []string, err error) {
 
 // from https://stackoverflow.com/a/37767467
 func AizuArray(arr string, sep string) ([]int, error) {
+	const memSize = 100000
 	a := strings.Split(arr, sep)
-	b := make([]int, len(a))
+	b := make([]int, memSize)
 	var err error
 	for i, v := range a {
 		b[i], err = strconv.Atoi(v)
