@@ -14,8 +14,7 @@ func main() {
 	in := make(chan int, 1)
 	out := make(chan int, 1)
 
-	// Test input
-	in <- 1
+	in <- 2
 	go common.NewIntcode(mem, in, out).Execute()
 
 	for output := range out {
